@@ -3,8 +3,6 @@
 
 #### 1、更新内容
 
-- 10、视频上传部分已经亲测可用，目前多个项目检测暂无问题，大家可以放心使用了！
-- 9、如果使用PHP后台，后台不会对接此接口的话，博爱已经为你们量身定做了PHP后台接口，你们只需要把文件夹中的 postdynamic.php 文件发送给你们的PHP后台同事，他们就知道了，里面都有详细说明！
 - 8、优化自定义CA证书的导入配置
 - 7、新增https请求参数设置，新增详细打印参数！
 - 6、优化，新增https请求参数设置，新增详细打印参数！
@@ -14,8 +12,7 @@
 - 1、集成 get / post / put / delete 等常用请求方式的封装【已经测试通过】
 
 #### 2、demo展示
-详情demo，请前往[『BABaseProject』](https://github.com/boai/BABaseProject)！<br>
-Code4App 下载链接：[『BANetManager』](http://www.code4app.com/forum.php?mod=viewthread&tid=11787)！
+详情demo，请前往[『BABaseProject』](https://github.com/boai/BABaseProject)！
 
 #### 3、图片展示
 
