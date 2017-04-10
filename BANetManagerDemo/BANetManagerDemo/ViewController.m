@@ -47,16 +47,19 @@
  *
  * 在使用BAKit的过程中如果出现bug请及时以以下任意一种方式联系我，我会及时修复bug
  *
- * QQ     : 博爱1616【137361770】
+ * QQ     : 可以添加ios开发技术群 479663605 在这里找到我(博爱1616【137361770】)
  * 微博    : 博爱1616
  * Email  : 137361770@qq.com
  * GitHub : https://github.com/boai
  * 博客园  : http://www.cnblogs.com/boai/
  * 博客    : http://boai.github.io
+ * 简书    : http://www.jianshu.com/users/95c9800fdf47/latest_articles
+ * 简书专题 : http://www.jianshu.com/collection/072d578bf782
  
  *********************************************************************************
  
  */
+
 
 #import "ViewController.h"
 #import "BANetManager.h"
@@ -65,9 +68,13 @@ static NSString * const url1 = @"http://c.m.163.com/nc/video/home/1-10.html";
 static NSString * const url2 = @"http://apis.baidu.com/apistore/";
 static NSString * const url3 = @"http://yycloudvod1932283664.bs2dl.yy.com/djMxYTkzNjQzNzNkNmU4ODc1NzY1ODQ3ZmU5ZDJlODkxMTIwMjM2NTE5Nw";
 static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vgC6.jpg";
+#define defaultUrl        @"http://zl160528.15.baidusx.com/app/log_mobile.php"
 
 /*！国内天气预报融合版－apikey */
 //#define apikey  @"82428a4618b6aa313be6914d727cb9b7"
+
+#define BAKit_ShowAlertWithMsg(msg) [[[UIAlertView alloc] initWithTitle:@"博爱温馨提示" message:(msg) delegate:nil cancelButtonTitle:@"确 定" otherButtonTitles:nil] show];
+
 
 @interface ViewController ()
 {
@@ -99,29 +106,119 @@ static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vg
 
 @implementation ViewController
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    
+
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
     self.title = @"AFNetworking 3.1 封装demo";
-    [BANetManager ba_startNetWorkMonitoring];
+    
+    /*! 网络状态实时监测可以使用 block 回调，也可以使用单独方法判断 */
+    [self ba_netType];
+    
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+#pragma mark - 网络类型判断
+- (void)ba_netType
+{
+    BAWeak;
+    [BANetManager ba_startNetWorkMonitoringWithBlock:^(BANetworkStatus status) {
+        //        NSString *netType;
+        //        switch (status) {
+        //            case 0:
+        //                netType = @"未知网络";
+        //                [weakSelf alertWithMsg:netType];
+        //                break;
+        //            case 1:
+        //                netType = @"没有网络";
+        //                [weakSelf alertWithMsg:netType];
+        //                break;
+        //            case 2:
+        //                netType = @"您的网络类型为：手机 3G/4G 网络";
+        //                [weakSelf alertWithMsg:netType];
+        //                break;
+        //            case 3:
+        //                netType = @"您的网络类型为：wifi 网络";
+        //                /*! wifi 网络下请求网络：可以在父类写此方法，具体使用demo，详见：https://github.com/boai/BABaseProject */
+        //                [weakSelf getData:nil];
+        //                break;
+        //
+        //            default:
+        //                break;
+        //        }
+        [weakSelf ba_getCurrentNetworkStatusUseDefine:YES];
+        
+    }];
+}
+
+#pragma mark - 一次性网络状态判断
+- (void)ba_getCurrentNetworkStatusUseDefine:(BOOL)useDefine
+{
+    if (useDefine)
+    {
+        if (kIsHaveNetwork)
+        {
+            NSLog(@"有网络");
+            if (kIs3GOr4GNetwork)
+            {
+                BAKit_ShowAlertWithMsg(@"手机网络");
+            }
+            else if (kIsWiFiNetwork)
+            {
+                BAKit_ShowAlertWithMsg(@"WiFi网络");
+            }
+        }
+    }
+    else
+    {
+        /*! 也可以使用单独方法判断 */
+        if ([BANetManager ba_isHaveNetwork])
+        {
+            NSLog(@"当前有网络");
+            if ([BANetManager ba_isWiFiNetwork])
+            {
+                BAKit_ShowAlertWithMsg(@"当前有 wifi 网络");
+            }
+            if ([BANetManager ba_is3GOr4GNetwork])
+            {
+                BAKit_ShowAlertWithMsg(@"当前有 3GOr4G 网络");
+            }
+        }
+    }
+}
+
+- (void)alertWithMsg:(NSString *)msg
+{
+    [[[UIAlertView alloc] initWithTitle:@"温馨提示：" message:msg delegate:nil cancelButtonTitle:@"确 定" otherButtonTitles:nil, nil] show];
 }
 
 #pragma mark - ***** get
 - (IBAction)getData:(UIButton *)sender
 {
-    self.tasks = [BANetManager ba_requestWithType:BAHttpRequestTypeGet withUrlString:url1 withParameters:nil withSuccessBlock:^(id response) {
+    BAWeak;
+    [BANetManager ba_requestWithType:BAHttpRequestTypeGet
+                           urlString:url1
+                          parameters:nil
+                        successBlock:^(id response) {
         
         /*! 新增get请求缓存，飞行模式下开启试试看！ */
         NSLog(@"get请求数据成功： *** %@", response);
-        [[[UIAlertView alloc] initWithTitle:@"温馨提示：" message:@"get请求成功！" delegate:nil cancelButtonTitle:@"确 定" otherButtonTitles:nil, nil] show];
-        return;
-    } withFailureBlock:^(NSError *error) {
+        [weakSelf alertWithMsg:@"get请求成功！"];
+
+    } failureBlock:^(NSError *error) {
         
     } progress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         
@@ -131,16 +228,23 @@ static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vg
 #pragma mark - ***** post
 - (IBAction)postData:(UIButton *)sender
 {
+    BAWeak;
     /*! 此处的手机号填写自己的手机号，返回成功，即可收到短信验证码 */
-    NSString *url = @"http://api.mncnet.cn/mncApp/common/sendSmsCode";
-    NSDictionary *params = @{@"apiKey":@"A71F631C4788AB35AB1EE0191BD7FBDE", @"mobile":@"", @"sendType":@"1"};
-
-    self.tasks = [BANetManager ba_requestWithType:BAHttpRequestTypePost withUrlString:url withParameters:params withSuccessBlock:^(id response) {
+//    NSString *url = @"http://api.mncnet.cn/mncApp/common/sendSmsCode";
+//    NSDictionary *params = @{@"apiKey":@"A71F631C4788AB35AB1EE0191BD7FBDE",
+//                             @"mobile":@" ",
+//                             @"sendType":@"1"
+//                             };
+    NSDictionary *params = @{@"mobile":@""};
+    
+    [BANetManager ba_requestWithType:BAHttpRequestTypePost
+                           urlString:@"http://zl160528.15.baidusx.com/app/log_mobile.php"
+                          parameters:params
+                        successBlock:^(id response) {
         
         NSLog(@"post请求数据成功： *** %@", response);
-        [[[UIAlertView alloc] initWithTitle:@"温馨提示：" message:@"post请求成功！" delegate:nil cancelButtonTitle:@"确 定" otherButtonTitles:nil, nil] show];
-        return;
-    } withFailureBlock:^(NSError *error) {
+        [weakSelf alertWithMsg:@"post请求成功！"];
+    } failureBlock:^(NSError *error) {
         
     } progress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         
@@ -171,21 +275,23 @@ static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vg
     //        [[[UIAlertView alloc] initWithTitle:@"温馨提示：" message:@"您已经下载该视频！" delegate:nil cancelButtonTitle:@"确 定" otherButtonTitles:nil, nil] show];
     //        return;
     //    }
-    
-    self.tasks = [BANetManager ba_downLoadFileWithUrlString:url4 parameters:nil withSavaPath:path1 withSuccessBlock:^(id response) {
+    BAWeak;
+    NSString *url = @"http://static.yizhibo.com/pc_live/static/video.swf?onPlay=YZB.play&onPause=YZB.pause&onSeek=YZB.seek&scid=pALRs7JBtTRU9TWy";
+    self.tasks = [BANetManager ba_downLoadFileWithUrlString:url
+                                                 parameters:nil
+                                                   savaPath:path1
+                                               successBlock:^(id response) {
 
         NSLog(@"下载完成，路径为：%@", response);
         self.downloadLabel.text = @"下载完成";
         isFinishDownload = YES;
         [downloadBtn setTitle:@"下载完成" forState:UIControlStateNormal];
         [downloadBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+       [weakSelf alertWithMsg:@"视频下载完成！"];
         
-        [[[UIAlertView alloc] initWithTitle:@"温馨提示：" message:@"视频下载完成！" delegate:nil cancelButtonTitle:@"确 定" otherButtonTitles:nil, nil] show];
-        return;
+    } failureBlock:^(NSError *error) {
         
-    } withFailureBlock:^(NSError *error) {
-        
-    } withDownLoadProgress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
+    } downLoadProgress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         /*! 封装方法里已经回到主线程，所有这里不用再调主线程了 */
         self.downloadLabel.text = [NSString stringWithFormat:@"下载进度：%.2lld%%",100 * bytesProgress/totalBytesProgress];
         [downloadBtn setTitle:@"下载中..." forState:UIControlStateNormal];
@@ -208,15 +314,21 @@ static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vg
 #pragma mark - ***** 上传图片
 - (IBAction)uploadImageData:(UIButton *)sender
 {
-    /*! 此处要你们自己测拉，我没有相关服务器，只好麻烦各位了，发现有问题了及时联系博爱哈！ */
-    /*! 如果有大神补充完整也可以，将代码不全后发送给我，多谢！ */
-    
-    /*! 此处只需要传URL 和 parameters，和你的image数组就行了，具体压缩方法都已经做好处理！ */
-    self.tasks = [BANetManager ba_uploadImageWithUrlString:nil parameters:nil withImageArray:nil withSuccessBlock:^(id response) {
+    /*! 
+     
+     1、此上传图片单张、多图上传都经过几十个项目亲测可用，大家可以放心使用，使用过程中有问题，请加群：479663605 进行反馈，多谢！
+     2、此处只需要传URL 和 parameters，和你的image数组、FileName就行了，具体压缩方法都已经做好处理！
+     
+     
+     3、注意：如果使用PHP后台，后台不会对接此接口的话，博爱已经为你们量身定做了PHP后台接口，你们只需要把文件夹中的 postdynamic.php 文件发送给你们的PHP后台同事，他们就知道了，里面都有详细说明！
+     
+     */
+
+    [BANetManager ba_uploadImageWithUrlString:nil parameters:nil imageArray:nil fileName:nil successBlock:^(id response) {
         
-    } withFailurBlock:^(NSError *error) {
+    } failurBlock:^(NSError *error) {
         
-    } withUpLoadProgress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
+    } upLoadProgress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         
     }];
 }
@@ -224,25 +336,29 @@ static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vg
 #pragma mark - ***** 上传视频
 - (IBAction)uploadVideoData:(UIButton *)sender
 {
-    /*! 此处要你们自己测拉，我没有相关服务器，只好麻烦各位了，发现有问题了几十联系博爱哈！ */
-    /*! 如果有大神补充完整也可以，将代码补全后发送给我，多谢！ */
-    
-    [BANetManager ba_uploadVideoWithUrlString:nil parameters:nil withVideoPath:nil withSuccessBlock:^(id response) {
+    /*!
+     
+     1、此上传视频都经过几十个项目亲测可用，大家可以放心使用，使用过程中有问题，请加群：479663605 进行反馈，多谢！
+     2、此处只需要传URL 和 parameters就行了，具体压缩方法都已经做好处理！
+
+     */
+    [BANetManager ba_uploadVideoWithUrlString:nil parameters:nil videoPath:nil successBlock:^(id response) {
         
-    } withFailureBlock:^(NSError *error) {
+    } failureBlock:^(NSError *error) {
         
-    } withUploadProgress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
+    } uploadProgress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         
     }];
 }
 
 - (IBAction)putData:(UIButton *)sender
 {
-    /*! 此处要你们自己测拉，我没有相关服务器，只好麻烦各位了，发现有问题了几十联系博爱哈！ */
-    /*! 如果有大神补充完整也可以，将代码补全后发送给我，多谢！ */
-    [BANetManager ba_requestWithType:BAHttpRequestTypePut withUrlString:nil withParameters:nil withSuccessBlock:^(id response) {
-        
-    } withFailureBlock:^(NSError *error) {
+    NSString *url = @"http://120.76.245.240:8080/bda/resetPassword/?account=761463699@qq.com&password=q&OTP=634613";
+    NSDictionary *dict = @{@"EquipmentType":@"iPhone", @"EquipmentGUID":@"b61df00d-87db-426f-bc5a-bc8fffa907db"};
+    
+    [BANetManager ba_requestWithType:BAHttpRequestTypePut urlString:url parameters:dict successBlock:^(id response) {
+        NSLog(@"*********00000 : %@", response);
+    } failureBlock:^(NSError *error) {
         
     } progress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         
@@ -251,11 +367,9 @@ static NSString * const url4 = @"http://www.aomy.com/attach/2012-09/1347583576vg
 
 - (IBAction)deleteData:(UIButton *)sender
 {
-    /*! 此处要你们自己测拉，我没有相关服务器，只好麻烦各位了，发现有问题了几十联系博爱哈！ */
-    /*! 如果有大神补充完整也可以，将代码补全后发送给我，多谢！ */
-    [BANetManager ba_requestWithType:BAHttpRequestTypeDelete withUrlString:nil withParameters:nil withSuccessBlock:^(id response) {
+    [BANetManager ba_requestWithType:BAHttpRequestTypeDelete urlString:nil parameters:nil successBlock:^(id response) {
         
-    } withFailureBlock:^(NSError *error) {
+    } failureBlock:^(NSError *error) {
         
     } progress:^(int64_t bytesProgress, int64_t totalBytesProgress) {
         
